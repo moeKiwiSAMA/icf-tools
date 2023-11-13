@@ -3,8 +3,6 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     kotlin("jvm") version "1.8.20"
     id("com.github.johnrengelman.shadow") version "7.1.0"
-    kotlin("plugin.lombok") version "1.8.22"
-    id("io.freefair.lombok") version "5.3.0"
     application
 }
 
