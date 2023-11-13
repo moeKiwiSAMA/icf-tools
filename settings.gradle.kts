@@ -1,3 +1,3 @@
 
-rootProject.name = "icfgenerator"
+rootProject.name = "icf-tools"
 

@@ -5,6 +5,7 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+
 /**
  * @email me@kiwi.cat
  * @date 2023/6/26 12:40
@@ -21,9 +22,9 @@ object Crypt {
             .toByteArray()
 
 
-    fun encrypt(array2: ByteArray): List<Byte> {
+    fun encrypt(from: ByteArray): ByteArray {
         var num = 4096
-        val num2 = array2.size
+        val num2 = from.size
         val array = ByteArray(num2)
 
         val cipher = Cipher.getInstance("AES/CBC/NoPadding")
@@ -39,7 +40,7 @@ object Crypt {
                 num = num4
             }
             val array3 = ByteArray(num)
-            System.arraycopy(array2, num3, array3, 0, array3.size)
+            System.arraycopy(from, num3, array3, 0, array3.size)
 
             val value = ByteBuffer.wrap(array3.sliceArray(0..7)).order(ByteOrder.LITTLE_ENDIAN).long xor num3.toLong()
             val value2 = ByteBuffer.wrap(array3.sliceArray(8..15)).order(ByteOrder.LITTLE_ENDIAN).long xor num3.toLong()
@@ -64,6 +65,14 @@ object Crypt {
             System.arraycopy(result, 0, array, i, result.size)
             i += num
         }
-        return array.toList()
+        return array
+    }
+
+    fun decrypt(from: ByteArray): ByteArray {
+        val cipher = Cipher.getInstance("AES/CBC/NoPadding")
+        val keySpec = SecretKeySpec(aesKey, "AES")
+        val ivSpec = IvParameterSpec(aesIv)
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec)
+        return cipher.doFinal(from)
     }
 }

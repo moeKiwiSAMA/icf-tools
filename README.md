@@ -1,7 +1,6 @@
-# icfgenerator
+# icf-tools
 
-
-convert json to `SSSS` icf file
+convert between icf and json
 
 ```json
 {
@@ -37,18 +36,18 @@ convert json to `SSSS` icf file
       "type": "OPTION",
       "version": "A114",
       "buildDate": "19190810114514",
-      "requiredPlatformVersion": "99.99.99"
+      "requiredPlatformVersion": "00.00.0"
     }
   ]
 }
 ```
 
-save, and execute command
+json to icf
 ```bash
-java -jar icfgenerator.jar -f <fileName>.json
+java -jar icf-tools.jar j2i <jsonFile>
 ```
 
-The output will be
+icf to json
 ```bash
-<fileName>.json.icf
+java -jar icf-tools.jar i2j <icfFile>
 ```
