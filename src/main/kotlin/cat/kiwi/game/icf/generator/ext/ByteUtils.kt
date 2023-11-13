@@ -1,5 +1,7 @@
 package cat.kiwi.game.icf.generator.ext
 
+import cat.kiwi.game.icf.generator.model.ContentType
+
 /**
  * @email me@kiwi.cat
  * @date 2023/6/26 11:06
@@ -36,6 +38,8 @@ val Int.reversedDualBytes: List<Byte>
 
 val String.buildDateByteList: ArrayList<Byte>
     get() {
+        //20230210182916
+        // E7 07 02 0A 12 1D 10
         if (this.length != 14) {
             throw IllegalArgumentException("Build date format error")
         }
@@ -60,6 +64,8 @@ val String.buildDateByteList: ArrayList<Byte>
 val String.platformVersionByteList: ArrayList<Byte>
     get() {
         val version = this.split(".")
+        // 0071.55.01
+        // 01 37 47 00
         if (version.size != 3) {
             throw IllegalArgumentException("Platform version format error")
         }
@@ -132,4 +138,72 @@ val Long.reversedOctaBytes: List<Byte>
             ((this shr 8) and 0xFF).toByte(),
             (this and 0xFF).toByte()
         ).reversed()
+    }
+
+fun List<Byte>.toInt(): Int {
+    var result = 0
+    for (i in this.indices) {
+        result = result shl 8
+        result = result or (this[i].toInt() and 0xFF)
+    }
+    return result
+}
+
+val List<Byte>.contentType: ContentType
+    get() {
+        return if (this[0].toInt() == 0 && this[1].toInt() == 0) {
+            ContentType.PLATFORM
+        } else if (this[0].toInt() == 1 && this[1].toInt() == 0) {
+            ContentType.APP
+        } else if (this[0].toInt() == 1) {
+            ContentType.PATCH
+        } else if (this[0].toInt() == 2) {
+            ContentType.OPTION
+        } else {
+            throw Exception("Unknown Content Type")
+        }
+    }
+
+fun List<Byte>.convertToVersion(contentType: ContentType): String {
+    return when (contentType) {
+        ContentType.PLATFORM -> {
+            val major = this[2].toInt().let { String.format("%02d", it) }
+            val minor = this[1].toInt().let { String.format("%02d", it) }
+            val build = this[0].toInt().let { String.format("%02d", it) }
+            "$major.$minor.$build"
+        }
+
+        in listOf(ContentType.APP, ContentType.PATCH) -> {
+            val major = this[2].toInt().toString()
+            val minor = this[1].toInt().let { String.format("%02d", it) }
+            val build = this[0].toInt().let { String.format("%02d", it) }
+            "$major.$minor.$build"
+        }
+
+        ContentType.OPTION -> {
+            this.joinToString("") { it.toInt().toChar().toString() }
+        }
+
+        else -> "UNKNOWN"
+    }
+}
+
+val List<Byte>.buildDate: String
+    get() {
+        val year = this.slice(0..1).reversed().toInt()
+        val month = this[2].toInt().let { String.format("%02d", it) }
+        val day = this[3].toInt().let { String.format("%02d", it) }
+        val hour = this[4].toInt().let { String.format("%02d", it) }
+        val minute = this[5].toInt().let { String.format("%02d", it) }
+        val second = this[6].toInt().let { String.format("%02d", it) }
+        return "$year$month$day$hour$minute$second"
+    }
+
+val List<Byte>.requiredPlatformVersion:String
+    get() {
+        return if (this[3].toInt() == 0) {
+            this.slice(0..2).reversed().joinToString(".") { String.format("%02d",it) }
+        } else  {
+            this.slice(0..3).reversed().joinToString(".") { String.format("%02d",it) }
+        }
     }
