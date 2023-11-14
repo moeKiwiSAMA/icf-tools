@@ -81,7 +81,10 @@ object ContentParser {
         if (content.type == ContentType.PATCH) {
             val pvbl = content.requiredPlatformVersion.platformVersionByteList
             appVer.addAll(pvbl)
-            contentBytes.addAll(allAPPVer.last())
+            val lastAppVer = allAPPVer.last()
+            val fixedPayload = lastAppVer.subList(0, lastAppVer.size-4)
+            fixedPayload.addAll(listOf(0,0,0,0))
+            contentBytes.addAll(fixedPayload)
         } else {
             contentBytes.addAll((1..0x10).map { 0x00 })
         }
